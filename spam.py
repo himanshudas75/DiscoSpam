@@ -108,8 +108,7 @@ async def spam(ctx, arg0, arg1, arg2='100', arg3=0, arg4=0):
     if not arg2.isnumeric():    #DM Spam another server
         user_exist = False
         for user in guild.members:
-            print(user.id)
-            if str(user.id) == arg2[1:]:
+            if str(user) == arg2:
                 user_exist = True
                 break
         if not user_exist:
