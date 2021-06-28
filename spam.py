@@ -113,6 +113,7 @@ async def spam(ctx, arg0, arg1, arg2='100', arg3=0, arg4=0):
                 break
         if not user_exist:
             emb=discord.Embed(title='User not found in guild',color=0xff0000)
+            await ctx.send(embed=emb)
             return
         if arg3>=UPPER_LIMIT:
             emb=discord.Embed(title=f'Please enter a number less than {UPPER_LIMIT}',color=0xff0000)
