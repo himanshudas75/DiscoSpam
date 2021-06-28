@@ -117,7 +117,8 @@ async def spamhentai(ctx, arg1, arg2='100', arg3=0, arg4=0):
             if str(guild.id) == arg1:
                 guild_exist = True
                 for user in guild.members:
-                    print(user)
+                    if str(user) == arg2:
+                        print(user)
                 return
     arg2 = int(arg2)
     if arg2>=UPPER_LIMIT:
