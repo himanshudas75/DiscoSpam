@@ -106,10 +106,6 @@ async def spammeme(ctx, arg1, arg2=100):
 
 @client.command(name='spamhentai',help='Spam only hentai')
 async def spamhentai(ctx, arg1, arg2='100', arg3=0, arg4=0):
-    if arg2>=UPPER_LIMIT:
-        emb=discord.Embed(title=f'Please enter a number less than {UPPER_LIMIT}',color=0xff0000)
-        await ctx.send(embed=emb)
-        return
     guild_exist = False
     load_guilds()
     if arg1 in guild_ids:
@@ -124,6 +120,10 @@ async def spamhentai(ctx, arg1, arg2='100', arg3=0, arg4=0):
                     print(user)
                 return
     arg2 = int(arg2)
+    if arg2>=UPPER_LIMIT:
+        emb=discord.Embed(title=f'Please enter a number less than {UPPER_LIMIT}',color=0xff0000)
+        await ctx.send(embed=emb)
+        return
     hentailist=naughty.hentai(arg2,arg3)
     emb=discord.Embed(title='Spam started!',color=0x0000ff)
     await ctx.send(embed=emb)
