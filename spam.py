@@ -116,7 +116,7 @@ async def spamhentai(ctx, arg1, arg2=100, arg3=0, arg4=0):
         emb=discord.Embed(title='This guild cannot be spammed',color=0xff0000)
         await ctx.send(embed=emb)
         return
-    if not arg1.isnumeric():
+    if not arg2.isnumeric():
         for guild in client2.guilds:
             if str(guild.id) == arg1:
                 guild_exist = True
