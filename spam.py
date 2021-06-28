@@ -9,7 +9,6 @@ import asyncio
 from spam_modules import meme, naughty
 from dotenv import load_dotenv
 
-load_dotenv("env")
 TOKEN=os.getenv('TOKEN')
 DISCO_MEME=os.getenv('DISCO_MEME')
 DISCO_HENTAI=os.getenv('DISCO_HENTAI')
