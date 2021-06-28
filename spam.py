@@ -112,15 +112,40 @@ async def spamhentai(ctx, arg1, arg2='100', arg3=0, arg4=0):
         emb=discord.Embed(title='This guild cannot be spammed',color=0xff0000)
         await ctx.send(embed=emb)
         return
-    if not arg2.isnumeric():
-        for guild in client2.guilds:
-            if str(guild.id) == arg1:
-                guild_exist = True
-                for user in guild.members:
-                    if str(user) == arg2:
-                        print(user)
-                return
-    arg2 = int(arg2)
+    for guild in client2.guilds:
+        if str(guild.id) == arg1:
+            guild_exist = True
+            break
+    if not guild_exist:
+        emb=discord.Embed(title='Hentai spamming bot is not in the guild',color=0xff0000)
+        await ctx.send(embed=emb)
+        return
+
+    if not arg2.isnumeric():    #DM Spam another server
+        user_exist = False
+        for user in guild.members:
+            if str(user) == arg2:
+                user_exist = True
+                break
+        if not user_exist:
+            emb=discord.Embed(title='User not found in guild',color=0xff0000)
+            return
+        if arg3>=UPPER_LIMIT:
+            emb=discord.Embed(title=f'Please enter a number less than {UPPER_LIMIT}',color=0xff0000)
+            await ctx.send(embed=emb)
+            return
+        if arg3 == 0:
+            arg3 = 100
+        hentailist=naughty.hentai(arg3,arg4)
+        emb=discord.Embed(title='Spam started!',color=0x0000ff)
+        await ctx.send(embed=emb)
+        for i in range(arg3):
+            emb=discord.Embed()
+            emb.set_image(url=hentailist[i])
+            await user.send(embed=emb)
+        return
+
+    arg2 = int(arg2)    #Server Spam
     if arg2>=UPPER_LIMIT:
         emb=discord.Embed(title=f'Please enter a number less than {UPPER_LIMIT}',color=0xff0000)
         await ctx.send(embed=emb)
@@ -129,18 +154,11 @@ async def spamhentai(ctx, arg1, arg2='100', arg3=0, arg4=0):
     emb=discord.Embed(title='Spam started!',color=0x0000ff)
     await ctx.send(embed=emb)
     for i in range(arg2):
-        for guild in client2.guilds:
-            if str(guild.id) == arg1:
-                guild_exist = True
-                for channel in guild.channels:
-                    if str(channel.type) == 'text':
-                        emb=discord.Embed()
-                        emb.set_image(url=hentailist[i])
-                        await channel.send(embed=emb)
-        if not guild_exist:
-            emb=discord.Embed(title='Hentai spamming bot is not in the guild',color=0xff0000)
-            await ctx.send(embed=emb)
-            break
+        for channel in guild.channels:
+            if str(channel.type) == 'text':
+                emb=discord.Embed()
+                emb.set_image(url=hentailist[i])
+                await channel.send(embed=emb)
     return
 
 loop=asyncio.get_event_loop()
