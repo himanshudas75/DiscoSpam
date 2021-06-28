@@ -69,11 +69,12 @@ class DiscoBot(commands.Cog):
         Add a server to the not-spammable list.
         *Syntax:* ```~addns <server_id> <server_name>```
         """
-        h.add_field(name='remns',value=text,inline=False)
+        h.add_field(name='addns',value=text,inline=False)
         text="""
         Remove a server from the non-spammable list.
         *Syntax:* ```~remns <server_id>```
         """
+        h.add_field(name='remns',value=text,inline=False)
         await ctx.send(embed=h)
     
     @commands.command(name='showns',help='Show non-spammable guilds')
