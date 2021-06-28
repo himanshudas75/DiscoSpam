@@ -116,7 +116,7 @@ async def spamhentai(ctx, arg1, arg2='100', arg3=0, arg4=0):
         for guild in client2.guilds:
             if str(guild.id) == arg1:
                 guild_exist = True
-                for user in guild.users:
+                for user in guild.members:
                     print(user)
                 return
     arg2 = int(arg2)
