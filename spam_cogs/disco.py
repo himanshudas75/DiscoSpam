@@ -80,7 +80,7 @@ class DiscoBot(commands.Cog):
     @commands.command(name='showns',help='Show non-spammable guilds')
     async def showns(self,ctx):
         self.load_guilds()
-        emb=discord.Embed(title='Non-Spammable Servers')
+        emb=discord.Embed(title='Non-Spammable Servers',color=0x00ff00)
         for guildid in guild_ids:
             emb.add_field(name=guild_ids[guildid],value=guildid,inline=False)
         await ctx.send(embed=emb)
