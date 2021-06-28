@@ -17,8 +17,8 @@ UPPER_LIMIT=200
 cl=[]
 intents=discord.Intents().all()
 client=commands.Bot(command_prefix='~',intents=intents)
-cl[0]=commands.Bot(command_prefix='>',intents=intents)
-cl[1]=commands.Bot(command_prefix=':',intents=intents)
+cl.append(commands.Bot(command_prefix='>',intents=intents))
+cl.append(commands.Bot(command_prefix=':',intents=intents))
 
 client.remove_command('help')
 cl[0].remove_command('help')
