@@ -46,6 +46,7 @@ async def voice_spam(channel,guild,ch):
     if vc.is_playing():
         return
     if vc.is_paused():
+        print('Paused')
         vc.resume()
         return
     source=FFmpegPCMAudio(AUDIO_SOURCE)
