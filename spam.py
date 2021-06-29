@@ -3,6 +3,7 @@ import discord
 import os
 from discord import channel
 from discord.ext import commands
+from discord import FFmpegAudio
 from discord.utils import get
 import json
 import asyncio
@@ -13,6 +14,8 @@ TOKEN=os.getenv('TOKEN')
 DISCO_MEME=os.getenv('DISCO_MEME')
 DISCO_HENTAI=os.getenv('DISCO_HENTAI')
 UPPER_LIMIT=200
+AUDIO_SOURCE = f'{os.getcwd()}/audio/play.mp3'
+NOT_SPAM = f'{os.getcwd()}/not_spammable.json'
 
 cl=[]
 intents=discord.Intents().all()
@@ -28,16 +31,26 @@ client.load_extension('spam_cogs.disco')
 cl[0].load_extension('spam_cogs.meteor')
 cl[1].load_extension('spam_cogs.hentai')
 
-@client.event
-async def on_ready():
-    print('I am online')
-
 def load_guilds():
 	global guild_ids
 	guild_ids=[]
-	with open('not_spammable.json','r') as f:
+	with open(NOT_SPAM,'r') as f:
 		guild_ids=json.load(f)
-         
+
+async def voice_spam(channel,guild,ch):
+    vc=discord.utils.get(cl[ch].voice_clients,guild=guild)
+    if not vc:
+        await channel.connect()
+        vc=discord.utils.get(cl[ch].voice_clients,guild=guild)
+    if vc.is_playing():
+        return
+    if vc.is_paused():
+        vc.resume()
+        return
+    source=FFmpegAudio(AUDIO_SOURCE)
+    vc.play(source)
+    return
+
 @client.command(name='spamall',help='Spam All')
 async def spamall(ctx, arg1, arg2=100, arg3=0):
     if arg2>=UPPER_LIMIT:
@@ -145,11 +158,15 @@ async def spam(ctx, arg0, arg1, arg2='100', arg3=0, arg4=0):
     emb=discord.Embed(title='Spam started!',color=0x0000ff)
     await ctx.send(embed=emb)
     for i in range(arg2):
+        aud=0
         for channel in guild.channels:
             if str(channel.type) == 'text':
                 emb=discord.Embed()
                 emb.set_image(url=li[i])
                 await channel.send(embed=emb)
+            elif aud == 0 and str(channel.type) == 'voice':
+                await voice_spam(channel,guild,ch)
+                aud+=1
     return
 
 loop=asyncio.get_event_loop()

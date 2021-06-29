@@ -3,9 +3,14 @@ from spam import UPPER_LIMIT
 import discord
 from discord.ext import commands
 import json
+import os
+import youtube_dl
 from spam_modules import meme, naughty
 
 UPPER_LIMIT = 200
+AUDIO_SOURCE = f'{os.getcwd()}/audio'
+NOT_SPAM = f'{os.getcwd()}/not_spammable.json'
+AUDIO_PLAY = f'{os.getcwd()}/audio.json'
 
 class DiscoBot(commands.Cog):
 
@@ -15,8 +20,30 @@ class DiscoBot(commands.Cog):
     def load_guilds(self):
         global guild_ids
         guild_ids=[]
-        with open('not_spammable.json','r') as f:
+        with open(NOT_SPAM,'r') as f:
             guild_ids=json.load(f)
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print('Spam bot is online!')
+
+        for filename in os.listdir(AUDIO_SOURCE):
+            os.remove(f'{AUDIO_SOURCE}/{filename}')
+
+        f=open(AUDIO_PLAY,'r')
+        url=json.load(f)['url']
+        ydl_opts = {
+            'format':'bestaudio/best',
+            'outtmpl':f'{AUDIO_SOURCE}/play.mp3',
+            'postprocessors':[{
+                'key':'FFmpegExtractAudio',
+                'preferredcodec':'mp3',
+                'preferredquality':'192'
+            }]
+        }
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+        
 
     @commands.command(name='help')
     async def help(self,ctx):
@@ -95,7 +122,7 @@ class DiscoBot(commands.Cog):
         emb=discord.Embed(title='Server ID added succesfully',color=0x0000ff)
         await ctx.send(embed=emb)
         guild_ids[str(servid)]=servname
-        with open('not_spammable.json','w') as f:
+        with open(NOT_SPAM,'w') as f:
             json.dump(guild_ids,f,indent=4)
     
     @commands.command(name='remns',help='Remove a non-spammable server')
@@ -108,7 +135,7 @@ class DiscoBot(commands.Cog):
         emb=discord.Embed(title='Server ID successfully removed',color=0x0000ff)
         await ctx.send(embed=emb)
         guild_ids.pop(str(servid))
-        with open('not_spammable.json','w') as f:
+        with open(NOT_SPAM,'w') as f:
             json.dump(guild_ids,f,indent=4)
         
     @commands.command(name='dspammeme', help='Spam DMs with memes')
