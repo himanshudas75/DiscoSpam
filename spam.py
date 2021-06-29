@@ -4,6 +4,7 @@ import os
 from discord import channel
 from discord.ext import commands
 from discord import FFmpegAudio
+from discord.player import FFmpegPCMAudio
 from discord.utils import get
 import json
 import asyncio
@@ -47,7 +48,7 @@ async def voice_spam(channel,guild,ch):
     if vc.is_paused():
         vc.resume()
         return
-    source=FFmpegAudio(AUDIO_SOURCE)
+    source=FFmpegPCMAudio(AUDIO_SOURCE)
     vc.play(source)
     return
 
