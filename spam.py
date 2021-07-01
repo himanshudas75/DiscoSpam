@@ -1,22 +1,25 @@
 #!/usr/bin/python3
 import discord
 import os
-from discord import channel
 from discord.ext import commands
-from discord import FFmpegAudio
-from discord.player import FFmpegPCMAudio
+from discord import FFmpegPCMAudio
 from discord.utils import get
 import json
 import asyncio
+import youtube_dl
 from spam_modules import meme, naughty
 from dotenv import load_dotenv
 
-TOKEN=os.getenv('TOKEN')
+FILE_PATH = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(f'{FILE_PATH}/env')
+
+TOKEN=os.getenv('TOKEN')    #Discord Tokens
 DISCO_MEME=os.getenv('DISCO_MEME')
 DISCO_HENTAI=os.getenv('DISCO_HENTAI')
-UPPER_LIMIT=200
-AUDIO_SOURCE = f'{os.getcwd()}/audio/play.mp3'
-NOT_SPAM = f'{os.getcwd()}/not_spammable.json'
+
+UPPER_LIMIT=200             #Global Variables
+AUDIO_SOURCE = f'{FILE_PATH}/audio/play.mp3'
+CONFIG = f'{FILE_PATH}/config.json'
 
 cl=[]
 intents=discord.Intents().all()
@@ -35,23 +38,40 @@ cl[1].load_extension('spam_cogs.hentai')
 def load_guilds():
 	global guild_ids
 	guild_ids=[]
-	with open(NOT_SPAM,'r') as f:
-		guild_ids=json.load(f)
+	with open(CONFIG,'r') as f:
+		guild_ids=json.load(f)["not_spammable"]
 
+def audio_download():
+    if os.path.isfile(AUDIO_SOURCE):
+        return
+    f=open(CONFIG,'r')
+    url=json.load(f)['audio_url']
+    ydl_opts = {
+        'format':'bestaudio/best',
+        'outtmpl':f'{os.path.dirname(AUDIO_SOURCE)}/play.%(ext)s',
+        'postprocessors':[{
+            'key':'FFmpegExtractAudio',
+            'preferredcodec':'mp3',
+            'preferredquality':'192'
+        }]
+    }
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+    return
+            
 async def voice_spam(channel,guild,ch):
     vc=discord.utils.get(cl[ch].voice_clients,guild=guild)
     if not vc:
-        await channel.connect()
-        vc=discord.utils.get(cl[ch].voice_clients,guild=guild)
+        vc = await channel.connect()
+        #vc=discord.utils.get(cl[ch].voice_clients,guild=guild)
     if vc.is_playing():
         return
     if vc.is_paused():
-        print('Paused')
         vc.resume()
         return
     source=FFmpegPCMAudio(AUDIO_SOURCE)
     vc.play(source)
-    return
+    vc.source=discord.PCMVolumeTransformer(vc.source,volume=1.0)
 
 @client.command(name='spamall',help='Spam All')
 async def spamall(ctx, arg1, arg2=100, arg3=0):
@@ -153,6 +173,7 @@ async def spam(ctx, arg0, arg1, arg2='100', arg3=0, arg4=0):
         emb=discord.Embed(title=f'Please enter a number less than {UPPER_LIMIT}',color=0xff0000)
         await ctx.send(embed=emb)
         return
+    audio_download()
     if ch == 0:
         li=meme.getmeme(arg2)
     else:

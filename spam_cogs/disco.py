@@ -4,13 +4,12 @@ import discord
 from discord.ext import commands
 import json
 import os
-import youtube_dl
 from spam_modules import meme, naughty
 
 UPPER_LIMIT = 200
-AUDIO_SOURCE = f'{os.getcwd()}/audio'
-NOT_SPAM = f'{os.getcwd()}/not_spammable.json'
-AUDIO_PLAY = f'{os.getcwd()}/audio.json'
+FILE_PATH = f'{os.path.dirname(os.path.abspath(__file__))}/..'
+CONFIG = f'{FILE_PATH}/config.json'
+config = {}
 
 class DiscoBot(commands.Cog):
 
@@ -18,32 +17,13 @@ class DiscoBot(commands.Cog):
         self.client=client
 
     def load_guilds(self):
-        global guild_ids
-        guild_ids=[]
-        with open(NOT_SPAM,'r') as f:
-            guild_ids=json.load(f)
+        global config
+        with open(CONFIG,'r') as f:
+            config=json.load(f)
 
     @commands.Cog.listener()
     async def on_ready(self):
         print('Spam bot is online!')
-
-        for filename in os.listdir(AUDIO_SOURCE):
-            os.remove(f'{AUDIO_SOURCE}/{filename}')
-
-        f=open(AUDIO_PLAY,'r')
-        url=json.load(f)['url']
-        ydl_opts = {
-            'format':'bestaudio/best',
-            'outtmpl':f'{AUDIO_SOURCE}/play.mp3',
-            'postprocessors':[{
-                'key':'FFmpegExtractAudio',
-                'preferredcodec':'mp3',
-                'preferredquality':'192'
-            }]
-        }
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([url])
-        
 
     @commands.command(name='help')
     async def help(self,ctx):
@@ -108,35 +88,35 @@ class DiscoBot(commands.Cog):
     async def showns(self,ctx):
         self.load_guilds()
         emb=discord.Embed(title='Non-Spammable Servers',color=0x00ff00)
-        for guildid in guild_ids:
-            emb.add_field(name=guild_ids[guildid],value=guildid,inline=False)
+        for guildid in config["not_spammable"]:
+            emb.add_field(name=config["not_spammable"][guildid],value=guildid,inline=False)
         await ctx.send(embed=emb)
 
     @commands.command(name='addns',help='Add a non-spammable server')
     async def addns(self,ctx,servid:int,*,servname):
         self.load_guilds()
-        if str(servid) in guild_ids:
+        if str(servid) in config["not_spammable"]:
             emb=discord.Embed(title='Server ID already added',color=0xff0000)
             await ctx.send(embed=emb)
             return
         emb=discord.Embed(title='Server ID added succesfully',color=0x0000ff)
         await ctx.send(embed=emb)
-        guild_ids[str(servid)]=servname
-        with open(NOT_SPAM,'w') as f:
-            json.dump(guild_ids,f,indent=4)
+        config["not_spammable"][str(servid)]=servname
+        with open(CONFIG,'w') as f:
+            json.dump(config,f,indent=4)
     
     @commands.command(name='remns',help='Remove a non-spammable server')
     async def remns(self,ctx,servid:int):
         self.load_guilds()
-        if str(servid) not in guild_ids:
+        if str(servid) not in config["not_spammable"]:
             emb=discord.Embed(title='Server ID is not present in non-spammable list',color=0xff0000)
             await ctx.send(embed=emb)
             return
         emb=discord.Embed(title='Server ID successfully removed',color=0x0000ff)
         await ctx.send(embed=emb)
-        guild_ids.pop(str(servid))
-        with open(NOT_SPAM,'w') as f:
-            json.dump(guild_ids,f,indent=4)
+        config["not_spammable"].pop(str(servid))
+        with open(CONFIG,'w') as f:
+            json.dump(config,f,indent=4)
         
     @commands.command(name='dspammeme', help='Spam DMs with memes')
     async def dspammeme(self, ctx, user:discord.User,arg2=100):
